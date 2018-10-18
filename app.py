@@ -42,7 +42,7 @@ app.layout = html.Div(children=[html.H1('Tree Health'),
     dcc.Dropdown(
             id='species-dropdown',
             options=[{'label': i, 'value': i} for i in species],
-            value='holly'           
+            value='mulberry'           
             ),
     dcc.Dropdown(
             id='borough-dropdown',
@@ -55,21 +55,28 @@ app.layout = html.Div(children=[html.H1('Tree Health'),
                               
 @app.callback(
     dash.dependencies.Output('Tree_Health', 'figure'),
-    [dash.dependencies.Input('species-dropdown', 'value')])
- #   [dash.dependencies.Input('borough-dropdown', 'value')])
+    [dash.dependencies.Input('species-dropdown', 'value'),
+    dash.dependencies.Input('borough-dropdown', 'value')])
 
 
-def update_figure(species_dropdown):
+def update_figure(species_dropdown, borough_dropdown):
   #  filtered_df = soql_trees_health[soql_trees_health.spc_common == selected_species]
    # filtered_df = soql_trees_health[soql_trees_health.borough == boroname]
     
     soql_url_health = ('https://data.cityofnewyork.us/resource/nwxe-4ae8.json?' +\
         '$select=health,count(tree_id)' +\
-        '&$where=spc_common=\'' + species_dropdown + '\''+\
-   #     '&$where=boroname=\'selected_borough\'' +\
+        '&$where=spc_common=\'' + species_dropdown + '\' AND boroname=\'' + borough_dropdown + '\''+\
         '&$group=health').replace(' ', '%20')
     
+
+  #  soql_url_health = ('https://data.cityofnewyork.us/resource/nwxe-4ae8.json?').replace(' ', '%20')
     soql_trees_health = pd.read_json(soql_url_health)
+
+#    soql_trees_health=soql_trees_health[soql_trees_health.spc_common == species_dropdown]
+ #   soql_trees_health=soql_trees_health[soql_trees_health.boroname == borough_dropdown]
+  #  soql_trees_health.groupby(['health']) 
+   # soql_trees_health=soql_trees_health['health',]
+
     tot = sum(soql_trees_health['count_tree_id'])
     soql_trees_health['proportion_tree'] = soql_trees_health['count_tree_id']/tot
   
